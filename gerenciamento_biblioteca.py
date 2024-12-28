@@ -103,6 +103,29 @@ class Biblioteca:
     self.emprestimos[id_usuario].remove(livro)
     livro.num_copias_disponiveis += 1
     print(f"O livro '{livro.titulo}' devolvido com sucesso!")
+  
+  def gerar_relatorios_livros_disponiveis(self):
+    print('\n---- Relatório de Livros Disponíveis ----')
+    for livro in self.livros:
+      if livro.num_copias_disponiveis > 0:
+        livro.exibir_informacoes_autor_livro()
+        print('-' * 20)
+  
+  def gerar_relatorios_livros_emprestados(self):
+    print('\n---- Relatórios de Livros Emprestados ----')
+    for usuario_id, livros in self.emprestimos.items():
+      if livros:
+        usuario = next((u for u in self.usuarios if u.id_usuario == usuario_id), None)
+        print(f"Usuário: {usuario.nome} (ID: {usuario.id_usuario})")
+        for livro in livros:
+          print(f' - {livro.titulo} por {livro.autor}')
+        print('-' * 20)
+  
+  def gerar_relatorio_usuarios(self):
+    print('\n---- Relatório de Usuários Cadastrados ----')
+    for usuario in self.usuarios:
+      usuario.exibir_informacoes_usuario()
+      print('-' * 20)
 
 # Criando a instância da biblioteca
 biblioteca = Biblioteca()
@@ -139,3 +162,8 @@ biblioteca.emprestar_livros('002', 'Biografia de Isaque')
 print('\n---- Devoluções ----')
 biblioteca.devolver_livro('003', 'Biografia de Isaque')
 biblioteca.devolver_livro('002', 'Dom Casmurro')
+
+# Gerando Relatórios
+biblioteca.gerar_relatorios_livros_disponiveis()
+biblioteca.gerar_relatorios_livros_emprestados()
+biblioteca.gerar_relatorio_usuarios()
