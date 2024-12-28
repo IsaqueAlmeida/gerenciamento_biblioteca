@@ -26,9 +26,10 @@ class Usuario:
 
 class Biblioteca:
   def __init__(self):
-    # armazenando objetos do tipo Livro e Usuário
+    # lista para armazenarf objetos do tipo Livro, Usuário e Emprestimo
     self.livros = []
     self.usuarios = []
+    self.emprestimos = {} # DIcionário para registrar emprestimos: (usuario_id: lista de livros)
   
   # Criando uma função para cadastrar livros
   def cadastrar_livros(self, livro):
@@ -58,6 +59,50 @@ class Biblioteca:
       for usuario in self.usuarios:
         usuario.exibir_informacoes_usuario()
         print('-' * 20)
+  
+  # Função - Emprestar livros
+  def emprestar_livros(self, id_usuario, titulo_livro):
+    # Encontrar usuário
+    usuario = next((u for u in self.usuarios if u.id_usuario == id_usuario), None)
+    if not usuario:
+      print('Usuário não encontrado!')
+      return
+    
+    # Encontrar livro
+    livro = next((l for l in self.livros if l.titulo == titulo_livro), None)
+    if not livro:
+      print('Livro não encontrado!')
+      return
+    
+    # Verificar disponibilidade
+    if livro.num_copias_disponiveis <= 0:
+      print(f"O livro '{livro.titulo}' não está disponível para empréstimo!")
+      return
+    
+    # Registrando empréstimo
+    if id_usuario not in self.emprestimos:
+      self.emprestimos[id_usuario] = []
+    self.emprestimos[id_usuario].append(livro)
+    livro.num_copias_disponiveis -= 1
+    print(f"Livro '{livro.titulo}' emprestado para {usuario.nome} com sucesso!")
+
+  # Função para devolver livro
+  def devolver_livro(self, id_usuario, titulo_livro):
+    # verificando se o usuário fez empréstimos
+    if id_usuario not in self.emprestimos or not self.emprestimos[id_usuario]:
+      print('Nenhum empréstimo encontrado para este usuário!')
+      return
+    
+    #encontrando livro emprestado
+    livro = next((l for l in self.emprestimos[id_usuario] if l.titulo == titulo_livro), None)
+    if not livro:
+      print(f"O livro '{titulo_livro}' não está registrado como emprestado para esse usuário!")
+      return
+    
+    # Atualizando devolução
+    self.emprestimos[id_usuario].remove(livro)
+    livro.num_copias_disponiveis += 1
+    print(f"O livro '{livro.titulo}' devolvido com sucesso!")
 
 # Criando a instância da biblioteca
 biblioteca = Biblioteca()
@@ -65,19 +110,32 @@ biblioteca = Biblioteca()
 # Criando alguns livros e usuários para cadastro
 livro1 = Livro('1984', 'George Orwell', 1949, 5)
 livro2 = Livro('Dom Casmurro', 'Marchado de Assis', 1899, 2)
+livro3 = Livro('Biografia de Isaque', 'Isaque Almeida', 2026, 100)
+print('\n')
 
 usuario1 = Usuario('Isaque Almeida', '001', 'isaque@gmail.com')
 usuario2 = Usuario('Nauhanne da Silva', '002', 'nauhanne@gmail.com')
+usuario3 = Usuario('Vitor Araújo', '003', 'vitor@gmail.com')
+print('\n')
 
 # cadastrando os livros e usuários na biblioteca
 biblioteca.cadastrar_livros(livro1)
 biblioteca.cadastrar_livros(livro2)
+biblioteca.cadastrar_livros(livro3)
+print('\n')
 
 biblioteca.cadastrar_usuario(usuario1)
 biblioteca.cadastrar_usuario(usuario2)
+biblioteca.cadastrar_usuario(usuario3)
+print('\n')
 
-# exibindo os livros e usuários cadastrados
-print('\n')
-biblioteca.exibir_livros()
-print('\n')
-biblioteca.exibir_usuario()
+# Testando os empréstimos
+print('\n---- Empréstimos ----')
+biblioteca.emprestar_livros('003', 'Biografia de Isaque')
+biblioteca.emprestar_livros('002', 'Dom Casmurro')
+biblioteca.emprestar_livros('002', 'Biografia de Isaque')
+
+# Testando devolução
+print('\n---- Devoluções ----')
+biblioteca.devolver_livro('003', 'Biografia de Isaque')
+biblioteca.devolver_livro('002', 'Dom Casmurro')
